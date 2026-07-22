@@ -1,3 +1,5 @@
+import { Rabbit, Shield, Bell } from "lucide-react";
+
 export const FEATURES = [
   {
     icon: Rabbit,
