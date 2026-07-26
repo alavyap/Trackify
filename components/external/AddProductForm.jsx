@@ -1,4 +1,5 @@
 "use client";
+
 // IN next js dynamic component should be a client component
 import { Input } from "@/components/ui/input.jsx";
 import React, { useState } from "react";
