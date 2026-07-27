@@ -2,9 +2,14 @@ import Image from "next/image";
 import { FEATURES } from "@/data/features";
 import AddProductForm from "@/components/external/AddProductForm";
 import AuthButton from "@/components/external/AuthButton";
+import { createClient } from "@/utils/supabase/server";
+import { TrendingDown } from "lucide-react";
 
-export default function Home() {
-  const user = null;
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const products = [];
 
   return (
@@ -63,6 +68,19 @@ export default function Home() {
           )}
         </div>
       </section>
+      {user && products.length == 0 && (
+        <section className="max-w-2xl mx-auto px-4 pb-20 text-center">
+          <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12">
+            <TrendingDown className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 ">
+              No Product To Track
+            </h3>
+            <p className="text-gray-600">
+              Add your first product above to start tracking !!
+            </p>
+          </div>
+        </section>
+      )}
     </main>
   );
 }
