@@ -11,8 +11,8 @@ export async function signOut() {
   redirect("/");
 }
 
-export async function addProduct(fromData) {
-  const url = FormData.length("url");
+export async function addProduct(formData) {
+  const url = formData.get("url");
 
   if (!url) {
     return { error: "URL is required" };
@@ -88,7 +88,7 @@ export async function addProduct(fromData) {
         : "Product added successfully",
     };
   } catch (error) {
-    console.log("Add product error:", error);
+    console.error("Add product error:", error);
     return { error: error.message || "Failed to add product" };
   }
 }
@@ -136,10 +136,8 @@ export async function getPriceHistory(productId) {
       .eq("product_id", productId)
       .order("checked_at", { ascending: true });
 
-      if (error) throw error;
-      return data || [];
-
-
+    if (error) throw error;
+    return data || [];
   } catch (error) {
     console.log("Get price history error:", error);
     return [];

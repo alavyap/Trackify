@@ -5,11 +5,37 @@ import { Input } from "@/components/ui/input.jsx";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { AuthModal } from "./AuthModal";
+import { addProduct } from "@/app/actions";
+import { toast } from "sonner";
 
 const AddProductForm = ({ user }) => {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const handleSubmit = async (e) => {};
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("url", url);
+
+    const result = await addProduct(formData);
+
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(result.message || "Product tracked successfully");
+      setUrl("");
+    }
+    setLoading(false);
+  };
 
   return (
     <>
@@ -19,7 +45,7 @@ const AddProductForm = ({ user }) => {
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste product URL (Amazon,Ikea, etc.)"
+            placeholder="Paste product URL (Amazon, Ikea, etc.)"
             className="h-12 text-base"
             required
             disabled={loading}
@@ -41,6 +67,10 @@ const AddProductForm = ({ user }) => {
         </div>
       </form>
       {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
     </>
   );
 };
