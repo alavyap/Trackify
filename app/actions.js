@@ -24,6 +24,10 @@ export async function addProduct(formData) {
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (!user) {
+      return { error: "Not authenticated " };
+    }
+
     // Scrape product data with FireCrawl
     const productData = await scrapeProduct(url);
 
@@ -36,8 +40,8 @@ export async function addProduct(formData) {
     const currency = productData.currencyCode || "USD";
 
     const { data: existingProduct } = await supabase
-      .from("products")
-      .select("id", user.id)
+      .from("trackify_products")
+      .select("id, current_price")
       .eq("user_id", user.id)
       .eq("url", url)
       .single();
@@ -46,33 +50,33 @@ export async function addProduct(formData) {
 
     // Upsert product (insert or update based on user_id + url)
     const { data: product, error } = await supabase
-      .from("products")
+      .from("trackify_products")
       .upsert(
         {
           user_id: user.id,
           url,
           name: productData.productName,
-          currency_price: newPrice,
+          current_price: newPrice,
           currency: currency,
           image_url: productData.productImageUrl,
           updated_at: new Date().toISOString(),
         },
         {
-          onConflict: "user_id, url", // Unique contraint on user_id +url
+          onConflict: "user_id,url", // Unique contraint on user_id +url
           ignoreDuplicates: false, // Always update if exists
         },
       )
       .select()
       .single();
 
-    if (error) throw Error;
+    if (error) throw error;
 
     // Add to price history if it's a new product OR price changed
     const shouldAddHistory =
-      !isUpdate || existingProduct.currency_price !== new newPrice();
+      !isUpdate || existingProduct.current_price !== newPrice;
 
     if (shouldAddHistory) {
-      await supabase.from("price_histroy").insert({
+      await supabase.from("price_history").insert({
         product_id: product.id,
         price: newPrice,
         currency: currency,
@@ -85,7 +89,7 @@ export async function addProduct(formData) {
       product,
       message: isUpdate
         ? "Product updated with latest price!"
-        : "Product added successfully",
+        : "Product added successfully !",
     };
   } catch (error) {
     console.error("Add product error:", error);
@@ -98,7 +102,7 @@ export async function deleteProduct(productId) {
     const supabase = await createClient();
 
     const { error } = await supabase
-      .from("products")
+      .from("trackify_products")
       .delete()
       .eq("id", productId);
 
@@ -115,7 +119,7 @@ export async function getProducts() {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from("products")
+      .from("trackify_products")
       .select("*")
       .order("created_at", { ascending: false });
 
