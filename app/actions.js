@@ -126,7 +126,7 @@ export async function getProducts() {
     if (error) throw error;
     return data || [];
   } catch (error) {
-    console.log("Get products error:", error);
+    console.error("Get products error:", error);
     return [];
   }
 }
@@ -143,7 +143,7 @@ export async function getPriceHistory(productId) {
     if (error) throw error;
     return data || [];
   } catch (error) {
-    console.log("Get price history error:", error);
+    console.error("Get price history error:", error);
     return [];
   }
 }
