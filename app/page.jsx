@@ -4,13 +4,14 @@ import AddProductForm from "@/components/external/AddProductForm";
 import AuthButton from "@/components/external/AuthButton";
 import { createClient } from "@/utils/supabase/server";
 import { TrendingDown } from "lucide-react";
+import { getProducts } from "./actions";
 
 export default async function Home() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const products = [];
+  const products = user ? await getProducts() : [];
 
   return (
     <main className="min-h-screen bg-linear-to-br from-blue-50 via-white to-orange-50">
@@ -68,6 +69,20 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {user && products.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 pb-20">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-gray-900">
+              Tracked Products
+            </h3>
+            <span className="text-sm text-gray-700">
+              {products.length} {products.length === 1 ? "product" : "products"}
+            </span>
+          </div>
+        </section>
+      )}
+
       {user && products.length == 0 && (
         <section className="max-w-2xl mx-auto px-4 pb-20 text-center">
           <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12">
