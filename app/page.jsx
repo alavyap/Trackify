@@ -5,6 +5,7 @@ import AuthButton from "@/components/external/AuthButton";
 import { createClient } from "@/utils/supabase/server";
 import { TrendingDown } from "lucide-react";
 import { getProducts } from "./actions";
+import ProductCard from "@/components/external/ProductCard";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -79,6 +80,11 @@ export default async function Home() {
             <span className="text-sm text-gray-700">
               {products.length} {products.length === 1 ? "product" : "products"}
             </span>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 items-start">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         </section>
       )}
